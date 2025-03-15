@@ -1,0 +1,42 @@
+package sheets
+
+import (
+	"fmt"
+	"google.golang.org/api/sheets/v4"
+	"pkg.botr.me/yamusic"
+)
+
+const (
+	sheetName = "Music"
+	mode      = "USER_ENTERED"
+)
+
+func (s *Service) Insert(track *yamusic.Track) error {
+	artists := ""
+	for _, artist := range track.Artists {
+		artists += artist.Name + " "
+	}
+
+	link := fmt.Sprintf("https://music.yandex.ru/album/%d/track/%s", track.Albums[0].ID, track.ID)
+
+	duration := track.DurationMs / 1000
+
+	values := &sheets.ValueRange{
+		Values: [][]interface{}{
+			// link - https://music.yandex.ru/album/5543883/track/42083820
+			// ID, AlbumId, Artist, Title, Link, Explicit, Time, Add (net)
+			{track.ID, track.Albums[0].ID, artists, track.Title, track.ContentWarning == "explicit",
+				link, duration, false},
+		},
+	}
+
+	rangeToAppend := fmt.Sprintf("%s!A:F", sheetName)
+
+	_, err := s.sheetsClient.Spreadsheets.Values.Append(
+		s.sheetId,
+		rangeToAppend,
+		values,
+	).ValueInputOption(mode).Do()
+
+	return err
+}
