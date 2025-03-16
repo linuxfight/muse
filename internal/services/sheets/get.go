@@ -51,6 +51,11 @@ func (s *Service) GetAllTracks() (*[]yamusic.PlaylistsTrack, error) {
 		if err != nil {
 			return nil, err
 		}
+		allowed := row[7]
+
+		if allowed == "FALSE" {
+			continue
+		}
 
 		tracks[i] = yamusic.PlaylistsTrack{
 			ID:      id,
