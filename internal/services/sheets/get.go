@@ -41,8 +41,8 @@ func (s *Service) GetAllTracks() (*[]yamusic.PlaylistsTrack, error) {
 		return nil, errorz.NoTracks
 	}
 
-	tracks := make([]yamusic.PlaylistsTrack, len(resp.Values))
-	for i, row := range resp.Values {
+	var tracks []yamusic.PlaylistsTrack
+	for _, row := range resp.Values {
 		id, err := strconv.Atoi(row[0].(string))
 		if err != nil {
 			return nil, err
@@ -57,10 +57,10 @@ func (s *Service) GetAllTracks() (*[]yamusic.PlaylistsTrack, error) {
 			continue
 		}
 
-		tracks[i] = yamusic.PlaylistsTrack{
+		tracks = append(tracks, yamusic.PlaylistsTrack{
 			ID:      id,
 			AlbumID: albumId,
-		}
+		})
 	}
 
 	return &tracks, nil

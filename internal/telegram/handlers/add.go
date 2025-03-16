@@ -8,6 +8,7 @@ import (
 	"muse/internal/errorz"
 	"muse/internal/services/logger"
 	"muse/internal/telegram/manager"
+	"strings"
 )
 
 func (ctl *Controller) addNew(ctx tele.Context) error {
@@ -53,7 +54,13 @@ func (ctl *Controller) addNew(ctx tele.Context) error {
 		}
 	}
 
-	logger.Log.Infof("%d added %s - %s", ctx.Sender().ID, track.Artists[0].Name, track.Title)
+	artists := ""
+	for _, artist := range track.Artists {
+		artists += artist.Name + ", "
+	}
+	artists = strings.TrimSuffix(artists, ", ")
 
-	return ctx.RespondText(fmt.Sprintf("Добавлен трек: %s - %s", track.Artists[0].Name, track.Title))
+	logger.Log.Infof("%d added %s - %s", ctx.Sender().ID, artists, track.Title)
+
+	return ctx.RespondText(fmt.Sprintf("Добавлен трек: %s - %s", artists, track.Title))
 }

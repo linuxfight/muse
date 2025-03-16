@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"google.golang.org/api/sheets/v4"
 	"pkg.botr.me/yamusic"
+	"strings"
 )
 
 const (
@@ -14,8 +15,9 @@ const (
 func (s *Service) Insert(track *yamusic.Track) error {
 	artists := ""
 	for _, artist := range track.Artists {
-		artists += artist.Name + " "
+		artists += artist.Name + ", "
 	}
+	artists = strings.TrimSuffix(artists, ", ")
 
 	link := fmt.Sprintf("https://music.yandex.ru/album/%d/track/%s", track.Albums[0].ID, track.ID)
 
