@@ -8,6 +8,7 @@ import (
 	"muse/internal/services/music"
 	"muse/internal/services/sheets"
 	"muse/internal/telegram/manager"
+	"muse/internal/telegram/webhook"
 	"os"
 	"strconv"
 	"strings"
@@ -24,7 +25,7 @@ type Controller struct {
 }
 
 func New() *Controller {
-	debug := os.Getenv("DEBUG") != ""
+	debug := os.Getenv("DEBUG") == "TRUE"
 
 	// Logger init
 	logger.New(debug)
@@ -53,19 +54,25 @@ func New() *Controller {
 			AllowedUpdates: []string{"message", "callback_query"},
 		}
 	} else {
-		poller = &tele.Webhook{
-			Listen:         "0.0.0.0:8080",
-			MaxConnections: 30,
+		secretToken := os.Getenv("WEBHOOK_SECRET")
+		url := os.Getenv("WEBHOOK_URL")
+
+		if url == "" {
+			logger.Log.Fatal("WEBHOOK_URL environment variable not set")
+		}
+
+		poller = webhook.New(&tele.Webhook{
+			Listen:         ":8080",
+			MaxConnections: 50,
 			AllowedUpdates: []string{"message", "callback_query"},
-			IP:             os.Getenv("WEBHOOK_IP"),
 			DropUpdates:    true,
-			SecretToken:    os.Getenv("WEBHOOK_SECRET"),
+			SecretToken:    secretToken,
 			HasCustomCert:  false,
 			TLS:            nil,
 			Endpoint: &tele.WebhookEndpoint{
-				PublicURL: os.Getenv("WEBHOOK_URL"),
+				PublicURL: url,
 			},
-		}
+		})
 	}
 
 	pref := tele.Settings{
