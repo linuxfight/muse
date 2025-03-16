@@ -9,6 +9,8 @@ import (
 	"muse/internal/services/sheets"
 	"muse/internal/telegram/manager"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -22,15 +24,21 @@ type Controller struct {
 }
 
 func New() *Controller {
-	// init settings
-	// TODO: get ids from env
-	adminIds := []int64{
-		687627953,
-	}
 	debug := os.Getenv("DEBUG") != ""
 
 	// Logger init
 	logger.New(debug)
+
+	adminString := os.Getenv("BOT_ADMINS")
+	adminStringSlice := strings.Split(adminString, ",")
+	var adminIds []int64
+	for _, adminString := range adminStringSlice {
+		adminId, err := strconv.ParseInt(adminString, 10, 64)
+		if err != nil {
+			logger.Log.Fatalf("Failed to parse admin id from %s: %v", adminString, err)
+		}
+		adminIds = append(adminIds, adminId)
+	}
 
 	// Telegram Bot init
 	botToken := os.Getenv("BOT_TOKEN")
