@@ -73,5 +73,7 @@ RUN adduser \
     appuser
 USER appuser
 
+EXPOSE 8080
+
 # What the container should run when it is started.
 ENTRYPOINT [ "/bin/bot" ]

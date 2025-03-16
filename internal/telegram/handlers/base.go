@@ -37,9 +37,32 @@ func New() *Controller {
 	if botToken == "" {
 		logger.Log.Fatal("BOT_TOKEN environment variable not set")
 	}
+
+	var poller tele.Poller
+	if debug {
+		poller = &tele.LongPoller{
+			Timeout:        10 * time.Second,
+			AllowedUpdates: []string{"message", "callback_query"},
+		}
+	} else {
+		poller = &tele.Webhook{
+			Listen:         "0.0.0.0:8080",
+			MaxConnections: 30,
+			AllowedUpdates: []string{"message", "callback_query"},
+			IP:             os.Getenv("WEBHOOK_IP"),
+			DropUpdates:    true,
+			SecretToken:    os.Getenv("WEBHOOK_SECRET"),
+			HasCustomCert:  false,
+			TLS:            nil,
+			Endpoint: &tele.WebhookEndpoint{
+				PublicURL: os.Getenv("WEBHOOK_URL"),
+			},
+		}
+	}
+
 	pref := tele.Settings{
 		Token:  botToken,
-		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
+		Poller: poller,
 	}
 	bot, err := tele.NewBot(pref)
 	if err != nil {
@@ -77,6 +100,10 @@ func New() *Controller {
 
 func (ctl *Controller) Start() {
 	logger.Log.Infof("Logged in as: https://t.me/@%s", ctl.bot.Me.Username)
+	err := ctl.bot.RemoveWebhook(true)
+	if err != nil {
+		logger.Log.Errorf("Failed to remove webhook: %v", err)
+		return
+	}
 	ctl.bot.Start()
-	// TODO: add webhook logic
 }
