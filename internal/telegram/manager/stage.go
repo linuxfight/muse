@@ -2,10 +2,11 @@ package manager
 
 import (
 	"context"
+	"time"
+
 	"github.com/nlypage/intele"
 	"github.com/nlypage/intele/collector"
 	"gopkg.in/telebot.v3"
-	"time"
 )
 
 type InputStage struct {
@@ -61,6 +62,7 @@ func PromptForInput(coll *collector.MessageCollector, c telebot.Context, stage *
 			})
 			return nil
 		case response.Callback != nil:
+			stage.Value = &response.Callback.Unique
 			return coll.Clear(c, collector.ClearOptions{
 				IgnoreErrors: true,
 			})

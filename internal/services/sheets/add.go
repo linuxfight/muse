@@ -2,17 +2,13 @@ package sheets
 
 import (
 	"fmt"
+	"strings"
+
 	"google.golang.org/api/sheets/v4"
 	"pkg.botr.me/yamusic"
-	"strings"
 )
 
-const (
-	sheetName = "Music"
-	mode      = "USER_ENTERED"
-)
-
-func (s *Service) Insert(track *yamusic.Track) error {
+func (s *Service) Insert(track *yamusic.Track, sheetListName string) error {
 	artists := ""
 	for _, artist := range track.Artists {
 		artists += artist.Name + ", "
@@ -21,7 +17,7 @@ func (s *Service) Insert(track *yamusic.Track) error {
 
 	link := fmt.Sprintf("https://music.yandex.ru/album/%d/track/%s", track.Albums[0].ID, track.ID)
 
-	duration := track.DurationMs / 1000
+	duration := track.DurationMs / 1000 / 60
 
 	values := &sheets.ValueRange{
 		Values: [][]interface{}{
@@ -32,13 +28,13 @@ func (s *Service) Insert(track *yamusic.Track) error {
 		},
 	}
 
-	rangeToAppend := fmt.Sprintf("%s!A:F", sheetName)
+	rangeToAppend := fmt.Sprintf("%s!A:F", sheetListName)
 
 	_, err := s.sheetsClient.Spreadsheets.Values.Append(
 		s.sheetId,
 		rangeToAppend,
 		values,
-	).ValueInputOption(mode).Do()
+	).ValueInputOption("USER_ENTERED").Do()
 
 	return err
 }

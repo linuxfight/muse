@@ -3,12 +3,13 @@ package sheets
 import (
 	"fmt"
 	"muse/internal/errorz"
-	"pkg.botr.me/yamusic"
 	"strconv"
+
+	"pkg.botr.me/yamusic"
 )
 
-func (s *Service) Exists(id string) (bool, error) {
-	rangeToRead := fmt.Sprintf("%s!A2:A", sheetName)
+func (s *Service) Exists(id string, sheetListName string) (bool, error) {
+	rangeToRead := fmt.Sprintf("%s!A2:A", sheetListName)
 	resp, err := s.sheetsClient.Spreadsheets.Values.Get(s.sheetId, rangeToRead).Do()
 	if err != nil {
 		return false, err
@@ -30,8 +31,8 @@ func (s *Service) Exists(id string) (bool, error) {
 	return false, nil
 }
 
-func (s *Service) GetAllTracks() (*[]yamusic.PlaylistsTrack, error) {
-	rangeToRead := fmt.Sprintf("%s!A2:H", sheetName)
+func (s *Service) GetAllTracks(sheetListName string) (*[]yamusic.PlaylistsTrack, error) {
+	rangeToRead := fmt.Sprintf("%s!A2:H", sheetListName)
 	resp, err := s.sheetsClient.Spreadsheets.Values.Get(s.sheetId, rangeToRead).Do()
 	if err != nil {
 		return nil, err

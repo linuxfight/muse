@@ -1,8 +1,10 @@
 package handlers
 
 import (
-	tele "gopkg.in/telebot.v3"
+	"muse/internal/services/config"
 	"slices"
+
+	tele "gopkg.in/telebot.v3"
 )
 
 var (
@@ -12,12 +14,12 @@ var (
 	}
 
 	genPlaylistBtn = tele.Btn{
-		Text:   "Создать плейлист",
+		Text:   "Обновить плейлисты",
 		Unique: "gen_playlist",
 	}
 )
 
-func markup(userId int64, admins []int64) *tele.ReplyMarkup {
+func startMenu(userId int64, admins []int64) *tele.ReplyMarkup {
 	menu := &tele.ReplyMarkup{ResizeKeyboard: true}
 
 	if slices.Contains(admins, userId) {
@@ -25,6 +27,22 @@ func markup(userId int64, admins []int64) *tele.ReplyMarkup {
 	} else {
 		menu.Inline(menu.Row(addNewBtn))
 	}
+
+	return menu
+}
+
+func groupMenu(groups []config.Group) *tele.ReplyMarkup {
+	menu := &tele.ReplyMarkup{ResizeKeyboard: true}
+
+	rows := []tele.Row{}
+	for _, group := range groups {
+		rows = append(rows, menu.Row(tele.Btn{
+			Text:   group.Name,
+			Unique: group.PlaylistId,
+		}))
+	}
+
+	menu.Inline(rows...)
 
 	return menu
 }

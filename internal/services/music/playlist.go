@@ -3,27 +3,29 @@ package music
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
+	"muse/internal/errorz"
 	"muse/internal/services/logger"
+
 	"pkg.botr.me/yamusic"
 )
 
 type playlist struct {
-	PlaylistId string `json:"playlistUuid"`
+	PlaylistId string                   `json:"playlistUuid"`
+	Tracks     []yamusic.PlaylistsTrack `json:"tracks"`
 	yamusic.PlaylistsResult
 }
 
-type createResponse struct {
+type listResponse struct {
 	InvocationInfo yamusic.InvocationInfo `json:"invocationInfo"`
 	Error          error                  `json:"error"`
-	Result         playlist               `json:"result"`
+	Result         []playlist             `json:"result"`
 }
 
-func (s *Service) GeneratePlaylist(c context.Context, title string, tracks *[]yamusic.PlaylistsTrack) (string, error) {
-	_, resp, err := s.client.Playlists().Create(c, title, true)
+func (s *Service) GeneratePlaylist(c context.Context, playlistId string, tracks *[]yamusic.PlaylistsTrack) error {
+	_, resp, err := s.client.Playlists().List(c, s.client.UserID())
 	if err != nil {
-		return "", err
+		return err
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -33,17 +35,26 @@ func (s *Service) GeneratePlaylist(c context.Context, title string, tracks *[]ya
 	}(resp.Body)
 
 	body, err := io.ReadAll(resp.Body)
-	create := createResponse{}
-	err = json.Unmarshal(body, &create)
+	if err != nil {
+		logger.Log.Panicf("failed to read body: %v", err)
+		return err
+	}
+	list := listResponse{}
+	err = json.Unmarshal(body, &list)
 	if err != nil {
 		logger.Log.Panicf("Failed to unmarshal response: %v", err)
-		return "", err
+		return err
 	}
 
-	_, _, err = s.client.Playlists().AddTracks(c, create.Result.Kind, create.Result.Revision, *tracks, nil)
-	if err != nil {
-		return "", err
+	for _, playlist := range list.Result {
+		if playlist.PlaylistId == playlistId {
+			s.client.Playlists().RemoveTracks(c, playlist.Kind, playlist.Revision, playlist.Tracks, nil)
+			_, _, err = s.client.Playlists().AddTracks(c, playlist.Kind, playlist.Revision, *tracks, nil)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
-	return fmt.Sprintf("https://music.yandex.ru/playlists/%s", create.Result.PlaylistId), nil
+	return errorz.PlaylistNotFound
 }

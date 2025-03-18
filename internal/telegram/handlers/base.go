@@ -2,24 +2,26 @@ package handlers
 
 import (
 	"context"
-	tele "gopkg.in/telebot.v3"
-	"gopkg.in/telebot.v3/middleware"
+	"muse/internal/services/config"
+	"muse/internal/services/db"
 	"muse/internal/services/logger"
 	"muse/internal/services/music"
 	"muse/internal/services/sheets"
 	"muse/internal/telegram/manager"
 	"muse/internal/telegram/webhook"
 	"os"
-	"strconv"
-	"strings"
 	"time"
+
+	tele "gopkg.in/telebot.v3"
+	"gopkg.in/telebot.v3/middleware"
 )
 
 type Controller struct {
 	bot     *tele.Bot
 	music   *music.Service
 	sheets  *sheets.Service
-	admins  []int64
+	storage *db.Service
+	config  *config.Data
 	dev     bool
 	webhook string
 }
@@ -29,17 +31,6 @@ func New() *Controller {
 
 	// Logger init
 	logger.New(debug)
-
-	adminString := os.Getenv("BOT_ADMINS")
-	adminStringSlice := strings.Split(adminString, ",")
-	var adminIds []int64
-	for _, adminString := range adminStringSlice {
-		adminId, err := strconv.ParseInt(adminString, 10, 64)
-		if err != nil {
-			logger.Log.Fatalf("Failed to parse admin id from %s: %v", adminString, err)
-		}
-		adminIds = append(adminIds, adminId)
-	}
 
 	// Telegram Bot init
 	botToken := os.Getenv("BOT_TOKEN")
@@ -93,11 +84,12 @@ func New() *Controller {
 	}
 
 	ctl := &Controller{
-		bot:    bot,
-		music:  music.New(),
-		sheets: sheets.New(context.Background()),
-		admins: adminIds,
-		dev:    debug,
+		bot:     bot,
+		music:   music.New(),
+		sheets:  sheets.New(context.Background()),
+		storage: db.New(context.Background()),
+		config:  config.New(),
+		dev:     debug,
 	}
 
 	// set up user handlers
@@ -107,7 +99,7 @@ func New() *Controller {
 
 	// set up admin handlers
 	admin := bot.Group()
-	admin.Use(middleware.Whitelist(adminIds...))
+	admin.Use(middleware.Whitelist(ctl.config.AdminIds...))
 	admin.Handle(&genPlaylistBtn, func(ctx tele.Context) error { return ctl.generatePlaylist(ctx) })
 
 	return ctl
