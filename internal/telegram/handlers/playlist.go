@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"muse/internal/services/logger"
 
 	tele "gopkg.in/telebot.v3"
@@ -25,7 +26,7 @@ func (ctl *Controller) generatePlaylist(ctx tele.Context) error {
 			return ctx.Send("Ошибка при обновлении плейлиста %s, обратитесь к администратору", group.PlaylistId)
 		}
 
-		if err := ctx.Send("Треки получены, запущено обновление плейлиста"); err != nil {
+		if err := ctx.Send(fmt.Sprintf("Треки получены, запущено обновление плейлиста %s", group.PlaylistId)); err != nil {
 			logger.Log.Errorf("failed to get all tracks: %v", err)
 			return ctx.Send("Ошибка при обновлении плейлиста s, обратитесь к администратору", group.PlaylistId)
 		}
