@@ -47,12 +47,15 @@ func (s *Service) GeneratePlaylist(c context.Context, playlistId string, tracks 
 	}
 
 	for _, playlist := range list.Result {
+		println(playlist.PlaylistId)
 		if playlist.PlaylistId == playlistId {
 			s.client.Playlists().RemoveTracks(c, playlist.Kind, playlist.Revision, playlist.Tracks, nil)
 			_, _, err = s.client.Playlists().AddTracks(c, playlist.Kind, playlist.Revision, *tracks, nil)
 			if err != nil {
 				return err
 			}
+
+			return nil
 		}
 	}
 
