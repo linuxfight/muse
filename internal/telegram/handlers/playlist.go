@@ -13,30 +13,27 @@ func (ctl *Controller) generatePlaylist(ctx tele.Context) error {
 		return err
 	}
 
-	playlistId, _, err := ctl.storage.GetUser(context.Background(), ctx.Sender().ID)
+	_, _, err := ctl.storage.GetUser(context.Background(), ctx.Sender().ID)
 	if err != nil {
 		return ctl.greet(ctx)
 	}
 
-	group := ctl.config.GetGroup(playlistId)
-	if group == nil {
-		return ctl.greet(ctx)
-	}
+	for _, group := range ctl.config.Groups {
+		tracks, err := ctl.sheets.GetAllTracks(group.SheetListName)
+		if err != nil {
+			logger.Log.Errorf("failed to get all tracks: %v", err)
+			return ctx.Send("Ошибка при обновлении плейлиста %s, обратитесь к администратору", group.PlaylistId)
+		}
 
-	tracks, err := ctl.sheets.GetAllTracks(group.SheetListName)
-	if err != nil {
-		logger.Log.Errorf("failed to get all tracks: %v", err)
-		return ctx.Send("Ошибка при обновлении плейлиста, обратитесь к администратору")
-	}
+		if err := ctx.Send("Треки получены, запущено обновление плейлиста"); err != nil {
+			logger.Log.Errorf("failed to get all tracks: %v", err)
+			return ctx.Send("Ошибка при обновлении плейлиста s, обратитесь к администратору", group.PlaylistId)
+		}
 
-	if err := ctx.Send("Треки получены, запущено обновление плейлиста"); err != nil {
-		logger.Log.Errorf("failed to get all tracks: %v", err)
-		return ctx.Send("Ошибка при обновлении плейлиста, обратитесь к администратору")
-	}
-
-	if err := ctl.music.GeneratePlaylist(context.Background(), playlistId, tracks); err != nil {
-		logger.Log.Errorf("failed to generate playlist: %v", err)
-		return ctx.Send("Ошибка при обновлении плейлиста, обратитесь к администратору")
+		if err := ctl.music.GeneratePlaylist(context.Background(), group.PlaylistId, tracks); err != nil {
+			logger.Log.Errorf("failed to generate playlist: %v", err)
+			return ctx.Send("Ошибка при обновлении плейлиста, обратитесь к администратору")
+		}
 	}
 
 	return ctx.Send("Обновление завершено!")

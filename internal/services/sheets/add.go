@@ -17,7 +17,7 @@ func (s *Service) Insert(track *yamusic.Track, sheetListName string) error {
 
 	link := fmt.Sprintf("https://music.yandex.ru/album/%d/track/%s", track.Albums[0].ID, track.ID)
 
-	duration := track.DurationMs / 1000 / 60
+	duration := float64(track.DurationMs) / 1000 / 60
 
 	values := &sheets.ValueRange{
 		Values: [][]interface{}{

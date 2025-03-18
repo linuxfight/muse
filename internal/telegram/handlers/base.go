@@ -23,7 +23,6 @@ type Controller struct {
 	storage *db.Service
 	config  *config.Data
 	dev     bool
-	webhook string
 }
 
 func New() *Controller {
