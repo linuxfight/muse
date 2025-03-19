@@ -31,11 +31,7 @@ func New() *Controller {
 	// Logger init
 	logger.New(debug)
 
-	// Telegram Bot init
-	botToken := os.Getenv("BOT_TOKEN")
-	if botToken == "" {
-		logger.Log.Fatal("BOT_TOKEN environment variable not set")
-	}
+	cfg := config.New()
 
 	var poller tele.Poller
 	if debug {
@@ -44,29 +40,22 @@ func New() *Controller {
 			AllowedUpdates: []string{"message", "callback_query"},
 		}
 	} else {
-		secretToken := os.Getenv("WEBHOOK_SECRET")
-		url := os.Getenv("WEBHOOK_URL")
-
-		if url == "" {
-			logger.Log.Fatal("WEBHOOK_URL environment variable not set")
-		}
-
 		poller = webhook.New(&tele.Webhook{
 			Listen:         ":8080",
 			MaxConnections: 50,
 			AllowedUpdates: []string{"message", "callback_query"},
 			DropUpdates:    true,
-			SecretToken:    secretToken,
+			SecretToken:    cfg.Bot.Webhook.Secret,
 			HasCustomCert:  false,
 			TLS:            nil,
 			Endpoint: &tele.WebhookEndpoint{
-				PublicURL: url,
+				PublicURL: cfg.Bot.Webhook.Url,
 			},
 		})
 	}
 
 	pref := tele.Settings{
-		Token:  botToken,
+		Token:  cfg.Bot.Token,
 		Poller: poller,
 	}
 	bot, err := tele.NewBot(pref)
@@ -84,10 +73,10 @@ func New() *Controller {
 
 	ctl := &Controller{
 		bot:     bot,
-		music:   music.New(),
-		sheets:  sheets.New(context.Background()),
-		storage: db.New(context.Background()),
-		config:  config.New(),
+		music:   music.New(cfg.Yandex.UserId, cfg.Yandex.Token),
+		sheets:  sheets.New(context.Background(), cfg.Db.Sheet),
+		storage: db.New(context.Background(), cfg.Db.Redis),
+		config:  cfg,
 		dev:     debug,
 	}
 
@@ -98,7 +87,7 @@ func New() *Controller {
 
 	// set up admin handlers
 	admin := bot.Group()
-	admin.Use(middleware.Whitelist(ctl.config.AdminIds...))
+	admin.Use(middleware.Whitelist(ctl.config.Bot.Admins...))
 	admin.Handle(&genPlaylistBtn, func(ctx tele.Context) error { return ctl.generatePlaylist(ctx) })
 
 	return ctl

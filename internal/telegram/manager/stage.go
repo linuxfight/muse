@@ -2,8 +2,8 @@ package manager
 
 import (
 	"context"
+	"strings"
 	"time"
- "strings"
 
 	"github.com/nlypage/intele"
 	"github.com/nlypage/intele/collector"
@@ -65,9 +65,9 @@ func PromptForInput(coll *collector.MessageCollector, c telebot.Context, stage *
 				IgnoreErrors: true,
 			})
 		case response.Callback != nil:
-  data := strings.Split(response.Callback.Data, "|")
+			data := strings.Split(response.Callback.Data, "|")
 			stage.Value = &data[1]
-  // .Unique
+			// .Unique
 			return coll.Clear(c, collector.ClearOptions{
 				IgnoreErrors: true,
 			})

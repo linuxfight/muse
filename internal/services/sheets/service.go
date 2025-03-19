@@ -19,14 +19,10 @@ type Service struct {
 }
 
 // New Google Sheets API init
-func New(ctx context.Context) *Service {
+func New(ctx context.Context, sheetId string) *Service {
 	sheetsClient, err := getClient()
 	if err != nil {
 		logger.Log.Fatalf("Failed to initialize Sheets client: %v", err)
-	}
-	sheetId := os.Getenv("SHEET_ID")
-	if sheetId == "" {
-		logger.Log.Fatalf("SHEET_ID environment variable not set")
 	}
 
 	srv, err := sheets.NewService(ctx, option.WithHTTPClient(sheetsClient))

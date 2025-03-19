@@ -13,6 +13,5 @@ settings/*
 
 go.work
 
-.env
-.idx
-.idx/dev.nix
+.idx/*
+!.idx/dev.nix

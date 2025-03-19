@@ -23,8 +23,8 @@ services:
         # Configure ACL
         echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
         # Apply system optimizations
-        echo 1 > /proc/sys/vm/overcommit_memory &&
-        echo never > /sys/kernel/mm/transparent_hugepage/enabled &&
+        # echo 1 > /proc/sys/vm/overcommit_memory &&
+        # echo never > /sys/kernel/mm/transparent_hugepage/enabled &&
         # Start Redis
         redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
       '
@@ -34,22 +34,20 @@ services:
       timeout: 10s
       retries: 5
     restart: unless-stopped
-    sysctls:
+    # sysctls:
       # Required for overcommit_memory to work in some environments
-      net.core.somaxconn: "511"
-    ulimits:
+    #   net.core.somaxconn: "511"
+    # ulimits:
       # Increase file descriptor limit
-      nofile:
-        soft: 65535
-        hard: 65535
+    #   nofile:
+    #     soft: 65535
+    #     hard: 65535
     tty: true
     stdin_open: true
   bot:
     image: ghcr.io/linuxfight/muse:main
     volumes:
       - ./settings:/settings
-    env_file:
-      - .env
     ports:
       - "8080:8080"
     restart: unless-stopped

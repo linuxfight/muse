@@ -36,9 +36,9 @@ func groupMenu(groups []config.Group) []telebot.Btn {
 	rows := []tele.Btn{}
 	for _, group := range groups {
 		rows = append(rows, tele.Btn{
-   Text:   group.Name,
-   Unique: "group",
-   Data: group.PlaylistId,
+			Text:   group.Name,
+			Unique: "group",
+			Data:   group.PlaylistId,
 		})
 	}
 

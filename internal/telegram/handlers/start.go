@@ -50,5 +50,5 @@ func (ctl *Controller) greet(ctx tele.Context) error {
 		ctl.storage.UpdateUser(context.Background(), ctx.Sender().ID, playlistId, 0)
 	}
 
-	return ctx.Send(fmt.Sprintf("❗ Ваш лимит треков: %d. \n\n❔ Что вы хотите сделать?", ctl.config.TracksLimit-tracksCount), startMenu(ctx.Sender().ID, ctl.config.AdminIds))
+	return ctx.Send(fmt.Sprintf("❗ Ваш лимит треков: %d. \n\n❔ Что вы хотите сделать?", ctl.config.TracksLimit-tracksCount), startMenu(ctx.Sender().ID, ctl.config.Bot.Admins))
 }

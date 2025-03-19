@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"muse/internal/services/logger"
-	"os"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -12,14 +11,7 @@ type Service struct {
 	db *redis.Client
 }
 
-func New(ctx context.Context) *Service {
-	addr := os.Getenv("REDIS_ADDR")
-
-	if addr == "" {
-		logger.Log.Fatal("REDIS_ADDR environment variable not set")
-		return nil
-	}
-
+func New(ctx context.Context, addr string) *Service {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: "",
