@@ -23,7 +23,7 @@ func (ctl *Controller) greet(ctx tele.Context) error {
 
 		playlistId := ctl.config.Groups[0].PlaylistId
 
-		if len(ctl.config.Groups) > 2 {
+		if len(ctl.config.Groups) >= 2 {
 			inputCollector := collector.New()
 			stage := &manager.InputStage{
 				Prompt:       "Выберете свою группу для плейлиста",
