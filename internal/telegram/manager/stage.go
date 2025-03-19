@@ -3,7 +3,6 @@ package manager
 import (
 	"context"
 	"time"
- "muse/internal/services/logger"
 
 	"github.com/nlypage/intele"
 	"github.com/nlypage/intele/collector"
