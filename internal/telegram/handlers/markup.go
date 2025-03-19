@@ -4,6 +4,7 @@ import (
 	"muse/internal/services/config"
 	"slices"
 
+	"gopkg.in/telebot.v3"
 	tele "gopkg.in/telebot.v3"
 )
 
@@ -31,18 +32,14 @@ func startMenu(userId int64, admins []int64) *tele.ReplyMarkup {
 	return menu
 }
 
-func groupMenu(groups []config.Group) *tele.ReplyMarkup {
-	menu := &tele.ReplyMarkup{ResizeKeyboard: true}
-
-	rows := []tele.Row{}
+func groupMenu(groups []config.Group) []telebot.Btn {
+	rows := []tele.Btn{}
 	for _, group := range groups {
-		rows = append(rows, menu.Row(tele.Btn{
+		rows = append(rows, tele.Btn{
 			Text:   group.Name,
 			Unique: group.PlaylistId,
-		}))
+		})
 	}
 
-	menu.Inline(rows...)
-
-	return menu
+	return rows
 }

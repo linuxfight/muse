@@ -28,9 +28,13 @@ func PromptForInput(coll *collector.MessageCollector, c telebot.Context, stage *
 		menu.Inline(
 			rows...,
 		)
-		_ = coll.Send(c, stage.Prompt, menu)
+		if err := coll.Send(c, stage.Prompt, menu); err != nil {
+			return err
+		}
 	} else {
-		_ = coll.Send(c, stage.Prompt)
+		if err := coll.Send(c, stage.Prompt); err != nil {
+			return err
+		}
 	}
 
 	for {
@@ -51,16 +55,14 @@ func PromptForInput(coll *collector.MessageCollector, c telebot.Context, stage *
 
 		switch {
 		case response.Canceled:
-			_ = coll.Clear(c, collector.ClearOptions{
+			return coll.Clear(c, collector.ClearOptions{
 				IgnoreErrors: true,
 				ExcludeLast:  true,
 			})
-			return nil
 		case err != nil:
-			_ = coll.Clear(c, collector.ClearOptions{
+			return coll.Clear(c, collector.ClearOptions{
 				IgnoreErrors: true,
 			})
-			return nil
 		case response.Callback != nil:
 			stage.Value = &response.Callback.Unique
 			return coll.Clear(c, collector.ClearOptions{
@@ -72,12 +74,12 @@ func PromptForInput(coll *collector.MessageCollector, c telebot.Context, stage *
 				IgnoreErrors: true,
 			})
 		default:
-			_ = coll.Clear(c, collector.ClearOptions{
-				IgnoreErrors: true,
-			})
-			_ = coll.Send(c,
-				stage.ErrorMessage,
-			)
+			if err := coll.Clear(c, collector.ClearOptions{IgnoreErrors: true}); err != nil {
+				return err
+			}
+			if err := coll.Send(c, stage.ErrorMessage); err != nil {
+				return err
+			}
 		}
 	}
 }

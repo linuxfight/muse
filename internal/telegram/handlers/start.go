@@ -34,7 +34,7 @@ func (ctl *Controller) greet(ctx tele.Context) error {
 				Value: nil,
 			}
 
-			if err := manager.PromptForInput(inputCollector, ctx, stage); err != nil {
+			if err := manager.PromptForInput(inputCollector, ctx, stage, groupMenu(ctl.config.Groups)...); err != nil {
 				logger.Log.Errorf("failed getting start input: %v", err)
 				return err
 			}
