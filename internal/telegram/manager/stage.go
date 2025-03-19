@@ -64,7 +64,8 @@ func PromptForInput(coll *collector.MessageCollector, c telebot.Context, stage *
 				IgnoreErrors: true,
 			})
 		case response.Callback != nil:
-			stage.Value = &response.Callback.Data // .Unique
+			stage.Value = &response.Callback.Data 
+  // .Unique
 			return coll.Clear(c, collector.ClearOptions{
 				IgnoreErrors: true,
 			})
