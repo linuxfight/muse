@@ -24,7 +24,6 @@ func PromptForInput(coll *collector.MessageCollector, c telebot.Context, stage *
 		menu := &telebot.ReplyMarkup{ResizeKeyboard: true}
 		var rows []telebot.Row
 		for _, btn := range buttons {
-  logger.Log.Debugf("btn data: %s - %s", btn.Unique, btn.Data)
 			rows = append(rows, menu.Row(btn))
 		}
 		menu.Inline(
@@ -66,7 +65,6 @@ func PromptForInput(coll *collector.MessageCollector, c telebot.Context, stage *
 				IgnoreErrors: true,
 			})
 		case response.Callback != nil:
-  logger.Log.Debugf("btn data: %s - %s", response.Callback.Unique, response.Callback.Data)
 			stage.Value = &response.Callback.Unique
 			return coll.Clear(c, collector.ClearOptions{
 				IgnoreErrors: true,
