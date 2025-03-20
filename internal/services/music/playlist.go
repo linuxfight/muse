@@ -11,22 +11,6 @@ import (
 	"pkg.botr.me/yamusic"
 )
 
-type playlist struct {
-	PlaylistId string `json:"playlistUuid"`
-	yamusic.PlaylistsResult
-}
-
-type playlistWithTracks struct {
-	Tracks []yamusic.Track `json:"tracks"`
-	playlist
-}
-
-type listResponse struct {
-	InvocationInfo yamusic.InvocationInfo `json:"invocationInfo"`
-	Error          error                  `json:"error"`
-	Result         []playlist             `json:"result"`
-}
-
 func (s *Service) GeneratePlaylist(c context.Context, playlistId string, tracks *[]yamusic.PlaylistsTrack) error {
 	_, resp, err := s.client.Playlists().List(c, s.client.UserID())
 	if err != nil {
@@ -69,35 +53,36 @@ func (s *Service) GeneratePlaylist(c context.Context, playlistId string, tracks 
 				logger.Log.Panicf("failed to read body: %v", err)
 				return err
 			}
-			playlist := playlistWithTracks{}
+			playlist := playlistWithTracksResult{}
 			if err := json.Unmarshal(body, &playlist); err != nil {
 				logger.Log.Panicf("Failed to unmarshal response: %v", err)
 				return err
 			}
 
 			tracksToRemove := []yamusic.PlaylistsTrack{}
-			for _, track := range playlist.Tracks {
-				id, err := strconv.Atoi(track.ID)
+			for _, track := range playlist.Result.Tracks {
+				id, err := strconv.Atoi(track.Track.ID)
 				if err != nil {
 					logger.Log.Panicf("failed to parse int: %s", track.ID)
 					return err
 				}
 
 				tracksToRemove = append(tracksToRemove, yamusic.PlaylistsTrack{
-					AlbumID: track.Albums[0].ID,
+					AlbumID: track.Track.Albums[0].ID,
 					ID:      id,
 				})
 			}
 
-			println(*tracks)
+			revision := playlist.Result.Revision
 
 			if len(tracksToRemove) > 0 {
-				if _, _, err = s.client.Playlists().RemoveTracks(c, playlist.Kind, playlist.Revision, tracksToRemove, nil); err != nil {
+				if _, _, err = s.client.Playlists().RemoveTracks(c, playlist.Result.Kind, revision, tracksToRemove, nil); err != nil {
 					return err
 				}
+				revision += 1
 			}
 
-			if _, _, err = s.client.Playlists().AddTracks(c, playlist.Kind, playlist.Revision, *tracks, nil); err != nil {
+			if _, _, err = s.client.Playlists().AddTracks(c, playlist.Result.Kind, revision, *tracks, nil); err != nil {
 				return err
 			}
 

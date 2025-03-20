@@ -14,3 +14,6 @@ settings/*
 go.work
 
 .idx/*
+!.idx/dev.nix
+.vscode
+.idea
