@@ -6,8 +6,8 @@ Telegram бот для сбора песен от участников в пле
 1. Установите docker
 2. Скопируйте ```compose.yml```
 3. Создайте папку ```settings``` там же, где и ```compose.yml```
-4. Добавьте данные от Google Cloud auth, нужен scope="https://www.googleapis.com/auth/spreadsheets" (```settings/credentials.json``` и ```settings/token.json```)
-5. Добавьте ```settings/config.json```
+4. Добавьте данные от Google Cloud Auth, нужен scope="https://www.googleapis.com/auth/spreadsheets" (```settings/credentials.json``` и ```settings/token.json```)
+5. Добавьте ```settings/config.json```. Смотрите примеры авторизации на Go от Google Cloud Auth. 
 ```json
 {
     "db": {
@@ -39,4 +39,4 @@ Telegram бот для сбора песен от участников в пле
 }
 ```
 ### ВАЖНО
-Если вы не хотите использовать webhook, то поставьте DEBUG=FALSE в переменных среды
+Если вы не хотите использовать webhook, то поставьте DEBUG=TRUE в переменных среды
