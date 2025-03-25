@@ -10,13 +10,14 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
+const text = "Привет, я бот для плейлиста будущей дискотеки! 🎧\n \n" +
+	"Мы заботимся о том, чтобы ваша дискотека была проведена в наилучшем виде ❤\n \n" +
+	"Отправь мне песню и я добавлю её в плейлист, если она пройдёт модерацию, то она будет в плейлисте ✨"
+
 func (ctl *Controller) greet(ctx tele.Context) error {
 	_, tracksCount, err := ctl.storage.GetUser(context.Background(), ctx.Sender().ID)
 	if err != nil {
-		err := ctx.Send("Привет, я бот для плейлиста будущей дискотеки! 🎧\n \n" +
-			"Мы заботимся о том, чтобы ваша дискотека была проведена в наилучшем виде ❤\n \n" +
-			"Отправь мне песню и я добавлю её в плейлист, если она пройдёт модерацию, то она будет в плейлисте ✨")
-		if err != nil {
+		if err := ctx.Send(text); err != nil {
 			logger.Log.Errorf("failed to respond: %v", err)
 			return err
 		}
@@ -36,7 +37,7 @@ func (ctl *Controller) greet(ctx tele.Context) error {
 
 			if err := manager.PromptForInput(inputCollector, ctx, stage, groupMenu(ctl.config.Groups)...); err != nil {
 				logger.Log.Errorf("failed getting start input: %v", err)
-				return err
+				return ctx.Send(fmt.Sprintf("Ошибка: %s", err.Error()))
 			}
 
 			if *stage.Value == "" {
@@ -47,7 +48,10 @@ func (ctl *Controller) greet(ctx tele.Context) error {
 			playlistId = *stage.Value
 		}
 
-		ctl.storage.UpdateUser(context.Background(), ctx.Sender().ID, playlistId, 0)
+		if err := ctl.storage.UpdateUser(context.Background(), ctx.Sender().ID, playlistId, 0); err != nil {
+			logger.Log.Errorf("failed to update redis: %s", err.Error())
+			return ctx.Send(fmt.Sprintf("Ошибка: %s", err.Error()))
+		}
 	}
 
 	return ctx.Send(fmt.Sprintf("❗ Ваш лимит треков: %d. \n\n❔ Что вы хотите сделать?", ctl.config.TracksLimit-tracksCount), startMenu(ctx.Sender().ID, ctl.config.Bot.Admins))

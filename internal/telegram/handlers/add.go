@@ -55,13 +55,14 @@ func (ctl *Controller) addNew(ctx tele.Context) error {
 
 	track, err := ctl.music.GetTrack(context.Background(), *stage.Value)
 	if err != nil {
-		return err
+		logger.Log.Error(err)
+		return ctx.Send(fmt.Sprintf("Ошибка: %s", err.Error()))
 	}
 
 	exists, err := ctl.sheets.Exists(track.ID, group.SheetListName)
 	if err != nil {
 		logger.Log.Error(err)
-		return err
+		return ctx.Send(fmt.Sprintf("Ошибка: %s", err.Error()))
 	}
 
 	if exists {
@@ -71,13 +72,13 @@ func (ctl *Controller) addNew(ctx tele.Context) error {
 	if err := ctl.sheets.Insert(track, group.SheetListName); err != nil {
 		if err := ctx.Send(notFoundText); err != nil {
 			logger.Log.Error(err)
-			return err
+			return ctx.Send(fmt.Sprintf("Ошибка: %s", err.Error()))
 		}
 	}
 
 	if err := ctl.storage.UpdateUser(context.Background(), ctx.Sender().ID, playlistId, tracksCount+1); err != nil {
 		logger.Log.Error(err)
-		return err
+		return ctx.Send(fmt.Sprintf("Ошибка: %s", err.Error()))
 	}
 
 	artists := ""
