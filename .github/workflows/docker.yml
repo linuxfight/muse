@@ -5,7 +5,8 @@ on:
       - .gitignore
       - README.md
       - compose.yml
-      - .env.example
+      - dev-compose.yml
+      - .idx/dev.nix
 
 env:
   REGISTRY: ghcr.io

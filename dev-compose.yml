@@ -39,13 +39,6 @@ services:
       # vm.overcommit_memory: "1" doesn't work here
     tty: true
     stdin_open: true
-  bot:
-    image: ghcr.io/linuxfight/muse:main
-    volumes:
-      - ./settings:/settings
-    ports:
-      - "127.0.0.1:8080:8080"
-    restart: unless-stopped
 
 volumes:
   valkey-data:
