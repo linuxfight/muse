@@ -59,11 +59,11 @@ func (s *Service) GeneratePlaylist(c context.Context, playlistId string, tracks 
 				return err
 			}
 
-			tracksToRemove := []yamusic.PlaylistsTrack{}
+			var tracksToRemove []yamusic.PlaylistsTrack
 			for _, track := range playlist.Result.Tracks {
 				id, err := strconv.Atoi(track.Track.ID)
 				if err != nil {
-					logger.Log.Panicf("failed to parse int: %s", track.ID)
+					logger.Log.Panicf("failed to parse int: %d", track.ID)
 					return err
 				}
 

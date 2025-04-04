@@ -33,7 +33,7 @@ func startMenu(userId int64, admins []int64) *tele.ReplyMarkup {
 }
 
 func groupMenu(groups []config.Group) []telebot.Btn {
-	rows := []tele.Btn{}
+	var rows []tele.Btn
 	for _, group := range groups {
 		rows = append(rows, tele.Btn{
 			Text:   group.Name,

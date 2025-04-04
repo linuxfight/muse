@@ -6,15 +6,6 @@ import (
 	"pkg.botr.me/yamusic"
 )
 
-type getPlaylistResult struct {
-	InvocationInfo yamusic.InvocationInfo `json:"invocationInfo"`
-	Error          error                  `json:"error"`
-	Result         struct {
-		PlaylistId string `json:"playlistUuid"`
-		yamusic.PlaylistsResult
-	} `json:"result"`
-}
-
 type playlistWithTracksResult struct {
 	InvocationInfo yamusic.InvocationInfo `json:"invocationInfo"`
 	Error          error                  `json:"error"`
