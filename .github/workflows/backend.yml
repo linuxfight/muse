@@ -5,6 +5,7 @@ on:
       - compose.yml
       - .gitignore
       - README.md
+      - .github/workflows/frontend-search.yml
 
 env:
   REGISTRY: ghcr.io

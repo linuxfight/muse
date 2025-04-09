@@ -5,6 +5,7 @@ on:
       - compose.yml
       - .gitignore
       - README.md
+      - .github/workflows/backend.yml
 
 jobs:
   build:
