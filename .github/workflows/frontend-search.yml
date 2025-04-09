@@ -64,17 +64,3 @@ jobs:
           path: |
             frontend/search/node_modules
           key: ${{ steps.restore.outputs.cache-primary-key }}
-
-      - name: Create an archive
-        run: tar -czvf release.tar.gz -C dist .
-
-      - name: Publish Release
-        id: publish_release
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          files: release.tar.gz
-          tag_name: ${{ steps.short_hash.outputs.HASH }}
-          name: ${{ github.event.head_commit.message }}
-          body: Release for commit ${{ steps.short_hash.outputs.HASH }}
