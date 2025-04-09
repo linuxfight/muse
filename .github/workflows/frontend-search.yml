@@ -93,7 +93,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './frontend/search/node_modules/dist'
+          path: './frontend/search/dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
