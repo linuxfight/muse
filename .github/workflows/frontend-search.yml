@@ -1,0 +1,99 @@
+name: frontend-search
+on:
+  push:
+    paths-ignore:
+      - compose.yml
+      - .gitignore
+      - README.md
+
+jobs:
+  build:
+    defaults:
+      run:
+        working-directory: 'frontend/search'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      pages: write
+      id-token: write
+
+    concurrency:
+      group: 'pages'
+      cancel-in-progress: true
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Shorten Commit Hash
+        id: short_hash
+        run: echo "HASH=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+      - name: Restore cached packages
+        id: restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+          key: packages
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10.8.0'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.14.0'
+          cache: 'pnpm'
+
+      - name: Build and install deps
+        run: pnpm install && pnpm run build
+
+      - name: Save packages to cache
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            node_modules
+          key: ${{ steps.restore.outputs.cache-primary-key }}
+
+      - name: Create an archive
+        run: tar -czvf release.tar.gz -C dist .
+
+      - name: Publish Release
+        id: publish_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: release.tar.gz
+          tag_name: ${{ steps.short_hash.outputs.HASH }}
+          name: ${{ github.event.head_commit.message }}
+          body: Release for commit ${{ steps.short_hash.outputs.HASH }}
+
+  deploy:
+    defaults:
+      run:
+        working-directory: 'frontend/search'
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
