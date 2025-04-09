@@ -52,6 +52,7 @@ jobs:
         with:
           node-version: '22.14.0'
           cache: 'pnpm'
+          cache-dependency-path: 'frontend/search/pnpm-lock.yaml'
 
       - name: Build and install deps
         run: pnpm install && pnpm run build
