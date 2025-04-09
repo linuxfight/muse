@@ -39,7 +39,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: |
-            node_modules
+            frontend/search/node_modules
           key: packages
 
       - name: Install pnpm
@@ -61,7 +61,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: |
-            node_modules
+            frontend/search/node_modules
           key: ${{ steps.restore.outputs.cache-primary-key }}
 
       - name: Create an archive
@@ -93,7 +93,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: './frontend/search/node_modules/dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
